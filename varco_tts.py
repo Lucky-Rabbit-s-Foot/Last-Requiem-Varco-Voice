@@ -48,7 +48,7 @@ def run_batch_tts(mode):
 
     try:
         df = pd.read_excel(EXCEL_FILE, sheet_name=SHEET_NAME)
-        df.fillna({'speed': 0, 'pitch': 0, 'text': '', 'voice': '', 'filename': 'temp'}, inplace=True)
+        df.fillna({'speed': 1.3, 'pitch': 0, 'text': '', 'voice': '', 'filename': 'temp', 'n_fm_steps': 8, 'seed': -1}, inplace=True)
     except Exception as e:
         print(f"❌ 엑셀 읽기 실패: {e}")
         return
@@ -76,6 +76,13 @@ def run_batch_tts(mode):
         voice_uuid = str(row['voice']).strip()
         speed = float(row['speed'])
         pitch = float(row['pitch'])
+        n_fm_steps = float(row['n_fm_steps'])
+        seed = float(row['seed'])
+
+        if n_fm_steps < 8:
+            n_fm_steps = 8
+        elif n_fm_steps > 20:
+            n_fm_steps = 20
 
         if not text or not voice_uuid:
             continue
@@ -106,6 +113,8 @@ def run_batch_tts(mode):
         payload = {
             "voice": voice_uuid,
             "text": text,
+            "n_fm_steps": n_fm_steps,
+            "seed": seed,
             "properties": {
                 "speed": speed,
                 "pitch": pitch
